@@ -1,0 +1,166 @@
+#include <stdio.h>
+
+// Функция за въвеждане на положително число
+// Връща: валидно положително число (float)
+float get_positive_number(const char *prompt)
+{
+    float number;
+    do
+    {
+        printf("%s", prompt);
+        scanf("%f", &number);
+        if (number < 0)
+        {
+            printf("Моля, въведете положително число!\n");
+        }
+    }
+    while (number < 0); // Повтаряме при отрицателно число
+    return number;
+}
+
+// Функция за въвеждане на точки (между 0 и максималните)
+// Връща: валидни точки между 0 и max_score
+float get_score(const char *prompt, float max_score)
+{
+    float score;
+    do
+    {
+        printf("%s", prompt);
+        scanf("%f", &score);
+        if (score < 0 || score > max_score)
+        {
+            printf("Точките трябва да са между 0 и %.1f!\n", max_score);
+        }
+    }
+    while (score < 0 || score > max_score);
+    return score;
+}
+
+// Показване на българска оценка (2-6)
+void print_bulgarian_grade(float percentage)
+{
+    printf("\n--- БЪЛГАРСКА ОЦЕНКА ---\n");
+    if (percentage >= 90)
+        printf("   Оценка: 6 (Отличен)\n");
+    else if (percentage >= 75)
+        printf("   Оценка: 5 (Много добър)\n");
+    else if (percentage >= 60)
+        printf("   Оценка: 4 (Добър)\n");
+    else if (percentage >= 50)
+        printf("   Оценка: 3 (Среден)\n");
+    else
+        printf("   Оценка: 2 (Слаб)\n");
+}
+
+// Показване на американска оценка (A-F)
+void print_american_grade(float percentage)
+{
+    printf("\n--- АМЕРИКАНСКА ОЦЕНКА ---\n");
+    if (percentage >= 90)
+        printf("   Оценка: A (Excellent)\n");
+    else if (percentage >= 80)
+        printf("   Оценка: B (Good)\n");
+    else if (percentage >= 70)
+        printf("   Оценка: C (Average)\n");
+    else if (percentage >= 60)
+        printf("   Оценка: D (Below Average)\n");
+    else
+        printf("   Оценка: F (Fail)\n");
+}
+
+// Изчисляване на сумата от масив с точки
+float calculate_sum(float scores[], int count)
+{
+    float sum = 0;
+    for (int i = 0; i < count; i++)
+    {
+        sum = sum + scores[i]; // Добавяме всяка точка
+    }
+    return sum;
+}
+
+// Главната функция – от тук започва програмата
+int main(void)
+{
+    // Показваме заглавие
+    printf("===========================================\n");
+    printf("  КАЛКУЛАТОР НА ОЦЕНКИ / GRADE CALCULATOR  \n");
+    printf("===========================================\n\n");
+
+    // СТЪПКА 1: Въвеждане на домашни работи
+    int num_assignments = get_positive_number("Колко домашни работи имате? ");
+    float max_assignment_points = get_positive_number("Колко точки е всяка домашна работа? ");
+    float assignments[num_assignments]; // Масив за точките от домашни
+
+    printf("\n--- ДОМАШНИ РАБОТИ ---\n");
+    for (int i = 0; i < num_assignments; i++)
+    {
+        char prompt[100];
+        sprintf(prompt, "Домашна %d (от %.1f точки): ", i + 1, max_assignment_points);
+        assignments[i] = get_score(prompt, max_assignment_points);
+    }
+
+    // СТЪПКА 2: Въвеждане на тестове
+    int num_tests = get_positive_number("\nКолко теста имате? ");
+    float max_test_points = get_positive_number("Колко точки е всеки тест? ");
+    float tests[num_tests]; // Масив за точките от тестове
+
+    printf("\n--- ТЕСТОВЕ ---\n");
+    for (int i = 0; i < num_tests; i++)
+    {
+        char prompt[100];
+        sprintf(prompt, "Тест %d (от %.1f точки): ", i + 1, max_test_points);
+        tests[i] = get_score(prompt, max_test_points);
+    }
+
+    // СТЪПКА 3: Въвеждане на тегла (важност на домашни и тестове)
+    printf("\n--- ТЕГЛА (WEIGHTS) ---\n");
+    float assignment_weight = get_positive_number("Каква част от оценката са домашните (0-100)? ");
+    float test_weight = get_positive_number("Каква част от оценката са тестовете (0-100)? ");
+
+    // Проверка: теглата трябва да събират 100
+    if (assignment_weight + test_weight != 100)
+    {
+        printf("\nВНИМАНИЕ: Теглата не събират 100!\n");
+        printf("Домашни (%.1f) + Тестове (%.1f) = %.1f\n",
+               assignment_weight, test_weight, assignment_weight + test_weight);
+    }
+
+    // СТЪПКА 4: Изчисления
+    float total_assignment_points = calculate_sum(assignments, num_assignments);
+    float total_test_points = calculate_sum(tests, num_tests);
+    float max_total_assignments = num_assignments * max_assignment_points;
+    float max_total_tests = num_tests * max_test_points;
+
+    printf("\n--- РЕЗУЛТАТИ ---\n");
+    printf("Домашни: %.1f / %.1f точки\n", total_assignment_points, max_total_assignments);
+    printf("Тестове: %.1f / %.1f точки\n", total_test_points, max_total_tests);
+
+    // Изчисляване на проценти: (получени / максимални) * 100
+    float assignment_percentage = (total_assignment_points / max_total_assignments) * 100;
+    float test_percentage = (total_test_points / max_total_tests) * 100;
+
+    printf("\nДомашни: %.2f%%\n", assignment_percentage);
+    printf("Тестове: %.2f%%\n", test_percentage);
+
+    // Крайна оценка: (домашни% * тегло) + (тестове% * тегло)
+    float final_percentage = (assignment_percentage * assignment_weight / 100) +
+                             (test_percentage * test_weight / 100);
+
+    // СТЪПКА 5: Показване на крайния резултат
+    printf("\n===========================================\n");
+    printf("           КРАЙНИ РЕЗУЛТАТИ\n");
+    printf("===========================================\n");
+    printf("\nКРАЕН РЕЗУЛТАТ: %.2f%%\n", final_percentage);
+
+    print_bulgarian_grade(final_percentage); // Показваме българска оценка (2-6)
+    print_american_grade(final_percentage);  // Показваме американска оценка (A-F)
+
+    printf("\n===========================================\n");
+    printf("Благодаря, че използвахте програмата!\n");
+    printf("Thank you for using the Grade Calculator!\n");
+    printf("===========================================\n");
+
+    return 0; // Край на програмата
+}
+
